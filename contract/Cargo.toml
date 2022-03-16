@@ -1,0 +1,23 @@
+
+[package]
+name = "round-net-contract"
+version = "0.0.1"
+description = "RoundNet Management contract"
+authors = ["mike7c2 <mike7c2@gmail.com>"]
+edition = "2018"
+
+[features]
+no-entrypoint = []
+
+[dependencies]
+borsh = "0.9.1"
+borsh-derive = "0.9.1"
+solana-program = "=1.8.11"
+
+[dev-dependencies]
+solana-program-test = "=1.8.11"
+solana-sdk = "=1.8.11"
+
+[lib]
+name = "round_table_contract"
+crate-type = ["cdylib", "lib"]

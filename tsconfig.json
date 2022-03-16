@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "outDir": "lib",
+  },
+  "include": [
+    "src"
+  ],
+  "ts-node": {
+    "compilerOptions": {
+      "module": "commonjs",
+      "jsx": "react"
+    }
+  },
+}
