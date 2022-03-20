@@ -67,7 +67,8 @@ All the messaging is performed using `libp2p`s `pubsub` functionality, with prot
  - [x] Allow table to have a list of channels
  - [x] Allow users to create a "seat" at a table
  - [x] Optionally require the signature of a table when adding users (so parent contract can choose who can join)
- - [x] CLI tool for managing contracct
+ - [x] CLI tool for managing contract
+    - [ ] Make user friendly
 
 ### Relay server
  - [x] js-libp2p bootstrap server
@@ -76,6 +77,7 @@ All the messaging is performed using `libp2p`s `pubsub` functionality, with prot
  - [ ] server can filter connections so only users with account can join
    - Implement a ConnectionGater in the libp2p config which checks the chain to see if a channelKey belongs to a user and can join the network
  - [ ] Docker image and instructions to bring up round-table servers, or create a sibling network
+ - [ ] Make accept config file with overriding arguments
 
 ### Examples
  - [ ] Clone network bringup tutorial
@@ -103,10 +105,10 @@ Interact with the smart contract via the tool in `util/contract_api`. My apologi
 
 For the following examples the participants are:
 
-Table owner: `69GoySbK6vc9QyWsCYTMUjpQXCocbDJansszPTEaEtMp`
-User: `DRSRtpAcN9emERXqjVLtLb5iCWDWt9VJ2LzVpUfuuKZ8`
-Users P2P ID: ``
-And the table and user keys are stored at `contract/keys/table1.json` and `contract/keys/user1.json`
+   * Table owner: `69GoySbK6vc9QyWsCYTMUjpQXCocbDJansszPTEaEtMp`
+   * User: `DRSRtpAcN9emERXqjVLtLb5iCWDWt9VJ2LzVpUfuuKZ8`
+   * Users P2P ID: ``
+   * Table and user keys are stored at `contract/keys/table1.json` and `contract/keys/user1.json`
 
 ## Fetching data
 ```
@@ -166,19 +168,97 @@ npx ts-node util/contract_api.ts addChannel contract/keys/table1.json 69GoySbK6v
 npx ts-node util/contract_api.ts addChannel contract/keys/table1.json 69GoySbK6vc9QyWsCYTMUjpQXCocbDJansszPTEaEtMp round-table-match-advertise
 npx ts-node util/contract_api.ts addChannel contract/keys/table1.json 69GoySbK6vc9QyWsCYTMUjpQXCocbDJansszPTEaEtMp round-table-match-unadvertise
 
-# Now bringup bootstrap servers
-# ....
-# ....
-
-# Clients can now join the network, using ....
-# TODO finish client bootstrap import and show example
+_Note that a project adding further protocols would add more channels here for their protocols_
 ```
 
-_Note that a project adding further protocols would add more channels here for their protocols_
+Now bringup bootstrap servers (on each server run one instance!), for bs1 server:
+```
+npx ts-node test/test_server.tsx bs1.json GKcVqYPMDUUk887AuPZ4DSu2Rt8MHV1wwZFvhMKKBUw4 localhost https://api.devnet.solana.com 8080 true
+```
+
+Clients can now join the network, by instantiating RoundTable with the correct configuration
+```
+    const connection: Connection = new Connection("https://api.devnet.solana.com")
+    const tableOwner: PublicKey = new PublicKey("69GoySbK6vc9QyWsCYTMUjpQXCocbDJansszPTEaEtMp")
+    const id: PublicKey = new PublicKey("DRSRtpAcN9emERXqjVLtLb5iCWDWt9VJ2LzVpUfuuKZ8")
+    const channelId: Keypair = new Keypair();
+    const netName: string = "round-table"
+
+    const table = await initRoundTable(
+        connection,
+        id,
+        channelId,
+        tableOwner,
+        netName
+    )
+```
 
 ## Examples
 
 For now check out the tests in `test/` which excercise the core interfaces for the `Matcher`, `Chat`, and `Presence` protocols. Also refer to their implementations,`pub` and `sub` are exposed via the `RoundTable` instace to make it easy to build extra protocols on top of a RoundNet deployment.
+
+# Misc notes
+
+## Running in browser
+
+The biggest road block to running in the browser is that it can only make https connections. This means it must connect to the bootstrap server with `WSS` or web sockets secure. As the relay server only exposes raw `WS` we must use nginx to reverse proxy and provide https.
+
+An example config looks like this (note, https certs managed via certbot)
+```
+worker_processes  1;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    sendfile        on;
+
+    keepalive_timeout  65;
+
+    map $http_upgrade $connection_upgrade {
+        default upgrade;
+        '' close;
+    }
+    server {
+        server_name  bs2.mike7c2.co.uk;
+
+        location / {
+            proxy_pass http://localhost:8080;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection $connection_upgrade;
+            proxy_set_header Host $host;
+        }
+    
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   html;
+        }
+    
+        listen 80; # managed by Certbot
+
+        listen 443 ssl; # managed by Certbot
+        ssl_certificate /etc/letsencrypt/live/bs2.mike7c2.co.uk/fullchain.pem; # managed by Certbot
+        ssl_certificate_key /etc/letsencrypt/live/bs2.mike7c2.co.uk/privkey.pem; # managed by Certbot
+        include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+        ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+    }
+}
+```
+
+## Keys keys keys
+
+### Solana identity keys
+
+Keypairs have been shamelessly included in this repo. This is currently a proof of concept with a set of predefined keys to let people have a poke around. Be nice, and don't make me learn a lesson :D
+
+### Channel Key
+
+Note the concept of a `channel key` - the key used to connect to libp2p is different to the solana wallet pubkey (this is very important, as it wouldt not be elegant for users to need to acknowledge the signature for every communication on the network). Currently the channel key is derived by signing a particular value with the users wallet. This creates a channel key which is always the same for a give publickey, but this mechanism is not very secure. If anyone can trick a user into signing the seed value, they can get the users public key. Further investigation is required here to manage this.
 
 
 
