@@ -11,13 +11,24 @@ export class RoundTableServer {
     libp2p: Libp2p | null;
     hostname: string;
     connection: Connection;
+    port: number;
+    announceWSS : boolean;
 
-    constructor(id: Keypair, tableOwner: PublicKey, hostname: string, rpc: string) {
+    constructor(
+        id: Keypair, 
+        tableOwner: PublicKey, 
+        hostname: string, 
+        rpc: string, 
+        port: number = 8080, 
+        announceWSS: boolean = true
+    ){
         this.id = id;
         this.tableOwner = tableOwner;
         this.hostname = hostname;
         this.connection = new Connection(rpc)
         this.libp2p = null;
+        this.port = port;
+        this.announceWSS = announceWSS;
     }
 
     async init() {
@@ -25,7 +36,7 @@ export class RoundTableServer {
         var chainData = await getTableData(this.connection, this.tableOwner)
         console.log("SERVER: Chaindata")
         console.log(chainData)
-        var config: any = buildConfig(this.hostname, chainData.servers);
+        var config: any = buildConfig(this.hostname, chainData.servers, this.port, this.announceWSS);
         console.log("SERVER: Using config")
         console.log(config)
 

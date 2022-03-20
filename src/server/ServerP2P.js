@@ -8,10 +8,15 @@ import Gossipsub from '@achingbrain/libp2p-gossipsub'
 import KadDHT from 'libp2p-kad-dht'
 import { PublicKey } from "@solana/web3.js"
 
-export function buildConfig(hostname, bootstraps) {
+export function buildConfig(hostname, bootstraps, port=8080, announceHttps=true) {
 
-    const announceAddress = "/dns4/" + hostname + "/tcp/443/wss";
-    const listenAddress = "/dns4/" + hostname + "/tcp/8080/ws";
+    const listenAddress = "/dns4/" + hostname + "/tcp/" + port.toString() + "/ws";
+    var announceAddress = ""
+    if (announceHttps) {
+        announceAddress = "/dns4/" + hostname + "/tcp/443/wss";
+    } else {
+        announceAddress = listenAddress;
+    }
 
     return {
         addresses: {

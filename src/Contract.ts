@@ -78,7 +78,7 @@ export const RoundTableSeatDataDefault = new RoundTableSeatData({
 export const RoundTableSeatDataSchema = new Map([[RoundTableSeatData, {
     kind: 'struct',
     fields: [
-        ['channelPubkey', [1024]],
+        ['channelPubkey', [32]],
     ]
 }]]);
 export function seatDeserialize(data: Buffer) {
