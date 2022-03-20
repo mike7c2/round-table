@@ -258,8 +258,10 @@ Keypairs have been shamelessly included in this repo. This is currently a proof 
 
 ### Channel Key
 
-Note the concept of a `channel key` - the key used to connect to libp2p is different to the solana wallet pubkey (this is very important, as it wouldt not be elegant for users to need to acknowledge the signature for every communication on the network). Currently the channel key is derived by signing a particular value with the users wallet. This creates a channel key which is always the same for a give publickey, but this mechanism is not very secure. If anyone can trick a user into signing the seed value, they can get the users public key. Further investigation is required here to manage this.
+Note the concept of a `channel key` - the key used to connect to libp2p is different to the solana wallet pubkey (this is very important, as it wouldt not be elegant for users to need to acknowledge the signature for every communication on the network). Currently the channel key is derived by signing a particular value with the users wallet. This creates a channel key which is always the same for a give publickey, but this mechanism is not very secure. If anyone can trick a user into signing the seed value, they can get the users public key. Further investigation is required here to manage this. (Actively seeking suggestions!).
 
+The smart contract is written such that "any" channel key can be used, it is only the client basing the channel key on the users wallet - this was done as it makes it simple for the user to have the same channel identity with only their wallet setup.
 
+## Smart contract
 
-
+Note that the smart contract is very simple. It uses a single static field of bytes and a `;` delimited string to separate channel and bootstrap instances. It performs no validation whatsoever. A production version of the smart contract should be more robost here.
