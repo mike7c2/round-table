@@ -1,7 +1,7 @@
 import { Connection, PublicKey, TransactionInstruction, SystemProgram } from "@solana/web3.js"
 import { deserializeUnchecked, serialize } from "borsh"
 
-export const PROGRAM_ID = new PublicKey("7XefegQxy2HCgTcfx94snboYAhAvfrggcvAwyLBffSUw");
+export const PROGRAM_ID = new PublicKey("Fn58N3tZQHg7Rj64VCH63D4nFhu2Nofwzvn9hC1qXHbZ");
 
 export function getTableAddress(owner: PublicKey, program_id: PublicKey): Promise<[PublicKey, number]> {
     return PublicKey.findProgramAddress([owner.toBytes()], program_id);
