@@ -105,6 +105,7 @@ export class RoundTable implements IRoundChat, IRoundPresence, IRoundMatch, IRou
     }
 
     sub(event: string, listener: (...args: any[]) => void) {
+        console.log("RoundTable: Subsrcibing to channel: " + this.netName + event)
         this.libp2p.pubsub.on(this.netName + event, listener);
         this.libp2p.pubsub.subscribe(this.netName + event);
     }
