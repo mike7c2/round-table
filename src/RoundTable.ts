@@ -54,10 +54,12 @@ export class RoundTable implements IRoundChat, IRoundPresence, IRoundMatch, IRou
         this.libp2p = libp2p;
         this.id = id;
 
+        this.netName = netName;
+        console.log("RoundTable: Using netname: " + this.netName)
         this.chatManager = new ChatManager(this as IRoundPubSub, this.id);
         this.presenceManager = new PresenceManager(this as IRoundPubSub, this.id);
         this.matchManager = new MatchManager(this as IRoundPubSub, this.id);
-        this.netName = netName;
+
         this._startPresencePolling();
     };
 
