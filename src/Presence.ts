@@ -37,15 +37,13 @@ export class PresenceManager {
     pubSub: IRoundPubSub;
     peerMap: any = {};
     id: PublicKey;
-    netName: string;
 
-    constructor(pubSub: IRoundPubSub, netName: string, id: PublicKey) {
+    constructor(pubSub: IRoundPubSub, id: PublicKey) {
         this.pubSub = pubSub;
         this.id = id;
-        this.netName = netName;
-        console.log("PRESENCE: Using channel " + netName + PRESENCE_PUBSUB_CHANNEL)
+        console.log("PRESENCE: Using channel " + PRESENCE_PUBSUB_CHANNEL)
 
-        this.pubSub.sub(netName + PRESENCE_PUBSUB_CHANNEL, msg => {
+        this.pubSub.sub(PRESENCE_PUBSUB_CHANNEL, msg => {
             this._handlePresenceMessage(msg);
         });
     }
@@ -76,6 +74,6 @@ export class PresenceManager {
             this.id
         );
         const msgData = new TextEncoder().encode(JSON.stringify(presenceMsg))
-        this.pubSub.pub(this.netName + PRESENCE_PUBSUB_CHANNEL, msgData);
+        this.pubSub.pub(PRESENCE_PUBSUB_CHANNEL, msgData);
     }
 }

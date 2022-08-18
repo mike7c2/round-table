@@ -45,7 +45,7 @@ export class RoundTable implements IRoundChat, IRoundPresence, IRoundMatch, IRou
     chatManager: ChatManager;
     presenceManager: PresenceManager;
     matchManager: MatchManager;
-
+    netName : string;
     constructor(
         libp2p: Libp2p,
         id: PublicKey,
@@ -54,9 +54,10 @@ export class RoundTable implements IRoundChat, IRoundPresence, IRoundMatch, IRou
         this.libp2p = libp2p;
         this.id = id;
 
-        this.chatManager = new ChatManager(this as IRoundPubSub, netName, this.id);
-        this.presenceManager = new PresenceManager(this as IRoundPubSub, netName, this.id);
-        this.matchManager = new MatchManager(this as IRoundPubSub, netName, this.id);
+        this.chatManager = new ChatManager(this as IRoundPubSub, this.id);
+        this.presenceManager = new PresenceManager(this as IRoundPubSub, this.id);
+        this.matchManager = new MatchManager(this as IRoundPubSub, this.id);
+        this.netName = netName;
         this._startPresencePolling();
     };
 
@@ -104,12 +105,12 @@ export class RoundTable implements IRoundChat, IRoundPresence, IRoundMatch, IRou
     }
 
     sub(event: string, listener: (...args: any[]) => void) {
-        this.libp2p.pubsub.on(event, listener);
-        this.libp2p.pubsub.subscribe(event);
+        this.libp2p.pubsub.on(this.netName + event, listener);
+        this.libp2p.pubsub.subscribe(this.netName + event);
     }
 
     pub(topic: string, message: Uint8Array) {
-        this.libp2p.pubsub.publish(topic, message);
+        this.libp2p.pubsub.publish(this.netName + topic, message);
     }
 }
 

@@ -460,21 +460,19 @@ export class MatchManager {
     matchStateManager: MatchStateManager;
     matchAgent: MatchAgent;
     listeners: MatchEventListener[] = [];
-    netName: string;
 
-    constructor(roundNet: IRoundPubSub, netName: string, id: PublicKey) {
+    constructor(roundNet: IRoundPubSub, id: PublicKey) {
         this.pubSub = roundNet;
-        this.netName = netName;
-        this.pubSub.sub(netName + MATCH_ADVERTISE_PUBSUB_CHANNEL, msg => {
+        this.pubSub.sub(MATCH_ADVERTISE_PUBSUB_CHANNEL, msg => {
             this._handleAdvertiseMessage(msg)
         });
-        this.pubSub.sub(netName + MATCH_UNADVERTISE_PUBSUB_CHANNEL, msg => {
+        this.pubSub.sub(MATCH_UNADVERTISE_PUBSUB_CHANNEL, msg => {
             this._handleUnadvertiseMessage(msg)
         });
-        this.pubSub.sub(netName + MATCH_CLAIM_PUBSUB_CHANNEL, msg => {
+        this.pubSub.sub(MATCH_CLAIM_PUBSUB_CHANNEL, msg => {
             this._handleClaimMessage(msg)
         });
-        this.pubSub.sub(netName + MATCH_ACK_PUBSUB_CHANNEL, msg => {
+        this.pubSub.sub(MATCH_ACK_PUBSUB_CHANNEL, msg => {
             this._handleAckMessage(msg)
         });
 
@@ -540,7 +538,7 @@ export class MatchManager {
     sendAdvertiseMessage(msg: MatchAdvertiseMessage) {
         const encoded = new TextEncoder().encode(JSON.stringify(msg.serialise()))
         this.pubSub.pub(
-            this.netName + MATCH_ADVERTISE_PUBSUB_CHANNEL,
+            MATCH_ADVERTISE_PUBSUB_CHANNEL,
             encoded
         );
         this._handleAdvertiseMessage({ data: encoded });
@@ -549,7 +547,7 @@ export class MatchManager {
     sendUnadvertiseMessage(msg: MatchUnadvertiseMessage) {
         const encoded = new TextEncoder().encode(JSON.stringify(msg.serialise()))
         this.pubSub.pub(
-            this.netName + MATCH_UNADVERTISE_PUBSUB_CHANNEL,
+            MATCH_UNADVERTISE_PUBSUB_CHANNEL,
             encoded
         );
         this._handleUnadvertiseMessage({ data: encoded });
@@ -558,7 +556,7 @@ export class MatchManager {
     sendClaimMessage(msg: MatchClaimMessage) {
         const encoded = new TextEncoder().encode(JSON.stringify(msg.serialise()))
         this.pubSub.pub(
-            this.netName + MATCH_CLAIM_PUBSUB_CHANNEL,
+            MATCH_CLAIM_PUBSUB_CHANNEL,
             encoded
         );
         this._handleClaimMessage({ data: encoded });
@@ -567,7 +565,7 @@ export class MatchManager {
     sendAckMessage(msg: MatchAckMessage) {
         const encoded = new TextEncoder().encode(JSON.stringify(msg.serialise()))
         this.pubSub.pub(
-            this.netName + MATCH_ACK_PUBSUB_CHANNEL,
+            MATCH_ACK_PUBSUB_CHANNEL,
             encoded
         );
         this._handleAckMessage({ data: encoded });

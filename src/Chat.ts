@@ -33,14 +33,12 @@ export class ChatManager {
     entries: number = 20;
     listeners: ChatEventListener[] = [];
     id: PublicKey;
-    netName: string;
 
-    constructor(pubSub: IRoundPubSub, netName: string, id: PublicKey) {
+    constructor(pubSub: IRoundPubSub, id: PublicKey) {
         this.pubSub = pubSub;
         this.id = id;
-        this.netName = netName;
-        console.log("CHAT: Using channel " + netName + CHAT_PUBSUB_CHANNEL)
-        this.pubSub.sub(netName + CHAT_PUBSUB_CHANNEL, msg => {
+        console.log("CHAT: Using channel " + CHAT_PUBSUB_CHANNEL)
+        this.pubSub.sub(CHAT_PUBSUB_CHANNEL, msg => {
             this._handleChatMessage(msg)
         });
     }
@@ -68,7 +66,7 @@ export class ChatManager {
     sendChatMessage(msg: string) {
         const chatMsg = new ChatMessage(this.id.toString(), sanitise(msg), (new Date()).toLocaleTimeString());
         const msgData = new TextEncoder().encode(JSON.stringify(chatMsg))
-        this.pubSub.pub(this.netName + CHAT_PUBSUB_CHANNEL, msgData);
+        this.pubSub.pub(CHAT_PUBSUB_CHANNEL, msgData);
         this.handleMessage(chatMsg)
     }
 

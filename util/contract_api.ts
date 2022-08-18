@@ -6,7 +6,11 @@ import BN from 'bn.js';
 import { readFileSync } from 'fs';
 
 //var connection = new Connection("http://localhost:8899/");
-var connection = new Connection("https://api.devnet.solana.com");
+//var connection = new Connection("https://api.devnet.solana.com");
+//var connection = new Connection("https://api.testnet.solana.com");
+var connection = new Connection("https://api.mainnet-beta.solana.com", "confirmed");
+
+
 const getOperations : any = {
     "getTableData": [getTableData, [PublicKey]],
     "getSeatData": [getSeatData, [PublicKey, PublicKey]]
