@@ -332,7 +332,7 @@ export class MatchAgent {
         // Check if there is already a match that we can try to join
         for (var m in this.manager.matchStateManager.matchMap) {
             var match = this.manager.matchStateManager.matchMap[m];
-            if (match.match == this.targetMatch && match.advertiser != this.id && (match.acksSeen.length == 0)) {
+            if (match.match == this.targetMatch && (!match.advertiser.equals(this.id)) && (match.acksSeen.length == 0)) {
                 console.log("Matcher: Joining existing game with id: " + match.matchId)
                 this.state = MatchAgentsStates.JOINING_WAITING_ACK;
                 this.lastActionStart = (new Date()).getTime();
