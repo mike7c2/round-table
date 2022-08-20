@@ -25,6 +25,7 @@ async function setup() {
     const rpcUrl = process.argv[5];
     const port = parseInt(process.argv[6]);
     const announceWSS = process.argv[7] == "true";
+    const verbose = process.argv[8] == "true";
 
     console.log("Starting server")
     console.log("ID: " + kp.publicKey.toString())
@@ -33,8 +34,9 @@ async function setup() {
     console.log("TableOwner:" + tableOwner.toString())
     console.log("Port: " + port)
     console.log("Announce WSS:" + announceWSS)
+    console.log("Verbose:" + verbose)
 
-    const server = new RoundTableServer(kp, tableOwner, hostName, rpcUrl, port, announceWSS);
+    const server = new RoundTableServer(kp, tableOwner, hostName, rpcUrl, port, announceWSS, verbose);
     await server.init()
 }
 

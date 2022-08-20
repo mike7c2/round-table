@@ -13,6 +13,7 @@ export class RoundTableServer {
     connection: Connection;
     port: number;
     announceWSS : boolean;
+    verbose : boolean;
 
     constructor(
         id: Keypair, 
@@ -20,7 +21,8 @@ export class RoundTableServer {
         hostname: string, 
         rpc: string, 
         port: number = 8080, 
-        announceWSS: boolean = true
+        announceWSS: boolean,
+        verbose: boolean
     ){
         this.id = id;
         this.tableOwner = tableOwner;
@@ -29,6 +31,7 @@ export class RoundTableServer {
         this.libp2p = null;
         this.port = port;
         this.announceWSS = announceWSS;
+        this.verbose = verbose;
     }
 
     async init() {
@@ -50,6 +53,11 @@ export class RoundTableServer {
         for (var i = 0; i < chainData.channels.length; i++) {
             console.log("SERVER: Subscribing to channel " + chainData.channels[i])
             libp2p.pubsub.subscribe(chainData.channels[i])
+            if (this.verbose) {
+                libp2p.pubsub.on(chainData.channels[i], (msg) => {
+                    console.log(chainData.channels[i] + ":" + msg.toString())
+                })
+            }
         }
     }
 }
