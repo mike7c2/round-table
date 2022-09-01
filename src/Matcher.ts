@@ -330,7 +330,8 @@ export class MatchAgent {
         this.matchId = null;
 
         // Check if there is already a match that we can try to join
-        for (var m in this.manager.matchStateManager.matchMap) {
+        // Randomise order for better matching with more peers
+        for (var m in Object.entries(this.manager.matchStateManager.matchMap).sort((a, b) => Math.random() - 0.5)) {
             var match = this.manager.matchStateManager.matchMap[m];
             if (match.match == this.targetMatch && (!match.advertiser.equals(this.id)) && (match.acksSeen.length == 0)) {
                 console.log("Matcher: Joining existing game with id: " + match.matchId)
