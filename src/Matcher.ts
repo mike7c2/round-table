@@ -331,8 +331,12 @@ export class MatchAgent {
 
         // Check if there is already a match that we can try to join
         // Randomise order for better matching with more peers
-        for (var m in Object.entries(this.manager.matchStateManager.matchMap).sort((a, b) => Math.random() - 0.5)) {
-            var match = this.manager.matchStateManager.matchMap[m];
+        const items = Object.entries(this.manager.matchStateManager.matchMap);
+        const randomItems = items.sort((a,b) => {return Math.random() - 0.5});
+
+        randomItems.forEach( (m) => {
+            console.log(m)
+            var match = m[1];
             if (match.match == this.targetMatch && (!match.advertiser.equals(this.id)) && (match.acksSeen.length == 0)) {
                 console.log("Matcher: Joining existing game with id: " + match.matchId)
                 this.state = MatchAgentsStates.JOINING_WAITING_ACK;
@@ -346,7 +350,7 @@ export class MatchAgent {
                 console.log("Matcher: Set match ID " + this.matchId)
                 return true;
             }
-        }
+        })
 
         console.log("Matcher: Advertising game")
         // Or start to advertise our own match
