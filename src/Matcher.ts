@@ -334,9 +334,8 @@ export class MatchAgent {
         const items = Object.entries(this.manager.matchStateManager.matchMap);
         const randomItems = items.sort((a,b) => {return Math.random() - 0.5});
 
-        randomItems.forEach( (m) => {
-            console.log(m)
-            var match = m[1];
+        for (var m in randomItems) {
+            var match = randomItems[m][1];
             if (match.match == this.targetMatch && (!match.advertiser.equals(this.id)) && (match.acksSeen.length == 0)) {
                 console.log("Matcher: Joining existing game with id: " + match.matchId)
                 this.state = MatchAgentsStates.JOINING_WAITING_ACK;
@@ -350,7 +349,7 @@ export class MatchAgent {
                 console.log("Matcher: Set match ID " + this.matchId)
                 return true;
             }
-        })
+        }
 
         console.log("Matcher: Advertising game")
         // Or start to advertise our own match
