@@ -20,9 +20,9 @@ async function setup() {
     } else {
         matchType = "test"
     }
-    var net = new RoundTable(node, id, "round-table");
+    var net = new RoundTable(node, id, "dc-devnet");
 
-    while (1) {
+    //while (1) {
         await delay(5000 +  (Math.floor(Math.random() * 4000)-200));
         var active = true;
         net.findMatch(matchType, 0, result => {
@@ -33,7 +33,7 @@ async function setup() {
         while (active) {
             await delay(1000);
         }
-    }
+    //}
 }
 
 setup().then(x => {

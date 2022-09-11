@@ -3,6 +3,8 @@ import { PublicKey, Keypair } from "@solana/web3.js"
 import { readFileSync } from 'fs';
 import { argv } from "process";
 
+export const PROGRAM_ID = new PublicKey("FYkpPVwm9AwTgM8XmYjsK33DZsJZQVVZPNwxGrqvAmVr");
+
 function delay(time: number) {
     return new Promise(resolve => setTimeout(resolve, time));
 }
@@ -36,7 +38,7 @@ async function setup() {
     console.log("Announce WSS:" + announceWSS)
     console.log("Verbose:" + verbose)
 
-    const server = new RoundTableServer(kp, tableOwner, hostName, rpcUrl, port, announceWSS, verbose);
+    const server = new RoundTableServer(kp, tableOwner, hostName, rpcUrl, port, announceWSS, verbose, PROGRAM_ID);
     await server.init()
 }
 

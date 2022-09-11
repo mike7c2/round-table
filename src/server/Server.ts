@@ -14,6 +14,7 @@ export class RoundTableServer {
     port: number;
     announceWSS : boolean;
     verbose : boolean;
+    programId : PublicKey;
 
     constructor(
         id: Keypair, 
@@ -22,7 +23,8 @@ export class RoundTableServer {
         rpc: string, 
         port: number = 8080, 
         announceWSS: boolean,
-        verbose: boolean
+        verbose: boolean,
+        programId: PublicKey
     ){
         this.id = id;
         this.tableOwner = tableOwner;
@@ -32,11 +34,12 @@ export class RoundTableServer {
         this.port = port;
         this.announceWSS = announceWSS;
         this.verbose = verbose;
+        this.programId = programId;
     }
 
     async init() {
         console.log("SERVER: Fetching chain data")
-        var chainData = await getTableData(this.connection, this.tableOwner)
+        var chainData = await getTableData(this.connection, this.tableOwner, this.programId)
         console.log("SERVER: Chaindata")
         console.log(chainData)
         var config: any = buildConfig(this.hostname, chainData.servers, this.port, this.announceWSS);

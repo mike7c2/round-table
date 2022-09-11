@@ -3,7 +3,7 @@ import { PublicKey, Connection, Keypair } from "@solana/web3.js"
 import { ChatManager, ChatMessage, ChatEventListener } from "./Chat"
 import { PresenceManager, PeerPresence } from "./Presence"
 import { MatchManager, MatchState, MatchResult, MatchEventListener } from './Matcher';
-import { getTableData } from "./Contract"
+import { getTableData, PROGRAM_ID } from "./Contract"
 import { getP2PNode, getDefaultConfig } from '.';
 import PeerId from "peer-id"
 import crypto from "libp2p-crypto"
@@ -117,9 +117,9 @@ export class RoundTable implements IRoundChat, IRoundPresence, IRoundMatch, IRou
     }
 }
 
-export async function initRoundTable(connection: Connection, id: PublicKey, channelId: Keypair, tableOwner: PublicKey, netName: string): Promise<RoundTable> {
+export async function initRoundTable(connection: Connection, id: PublicKey, channelId: Keypair, tableOwner: PublicKey, netName: string, programId : PublicKey): Promise<RoundTable> {
     console.log("RoundTable: Fetching chain data")
-    var chainData = await getTableData(connection, tableOwner)
+    var chainData = await getTableData(connection, tableOwner, programId)
     console.log("RoundTable: Chaindata")
     console.log(chainData)
     var config: any = getDefaultConfig(chainData.servers);

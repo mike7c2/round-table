@@ -68,7 +68,13 @@ All the messaging is performed using `libp2p`s `pubsub` functionality, with prot
  - [x] Allow users to create a "seat" at a table
  - [x] Optionally require the signature of a table when adding users (so parent contract can choose who can join)
  - [x] CLI tool for managing contract
-    - [ ] Make user friendly
+    - [x(ish)] Make user friendly
+ - [x] Authority delegation to allow account creation via CPI
+
+### Contract RPC interfacing
+ - [ ] API function to get all tables
+ - [ ] API function to get all users for a table
+ - [ ] Cache for user accounts (lower RPC calls)
 
 ### Relay server
  - [x] js-libp2p bootstrap server

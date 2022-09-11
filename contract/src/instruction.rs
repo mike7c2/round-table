@@ -5,6 +5,9 @@ use {
 
 #[derive(BorshSerialize, BorshDeserialize, Clone)]
 pub struct InitTableArgs {
+    pub channels_len: u32,
+    pub servers_len: u32,
+    pub authority: Pubkey,
     pub closed: bool,
 }
 
@@ -55,5 +58,6 @@ pub enum Errors {
     FailedToDeserialiseTableData,
     EntryAlreadyExists,
     EntryDoesntExist,
+    NotAllowed,
     Error,
 }

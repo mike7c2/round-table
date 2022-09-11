@@ -11,7 +11,8 @@
     "outDir": "lib",
   },
   "include": [
-    "src"
+    "src",
+    "util"
   ],
   "ts-node": {
     "compilerOptions": {

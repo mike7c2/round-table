@@ -8,7 +8,7 @@ import Gossipsub from '@achingbrain/libp2p-gossipsub'
 import KadDHT from 'libp2p-kad-dht'
 
 var node_instance = null;
-export function getDefaultConfig(bootstraps = ["/dns4/bs2.mike7c2.co.uk/tcp/443/wss/ipfs/QmVV9hEB5qrNeXwLtyVzbjHZQkCdjQbmvai6PdfrSoEJLM"]) {
+export function getDefaultConfig(bootstraps = ['/dns4/bs2.mike7c2.co.uk/tcp/443/wss/ipfs/12D3KooWS6zft3xHbKXuXqcmvBQgxzmxb65dFGVZtu3pSdguApcg']) {
     return {
         addresses: {
             // Don't bother with listen addresses - specifically, we don't care about direct connections

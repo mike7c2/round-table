@@ -3,12 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "main": "./lib/index.js",
+  "bin": {
+    "round-table-client": "./lib/util/contract_api.js"
+  },
+  "pkg": {
+    "scripts": "lib/**/*.js"
+  },
   "module": "./lib/index.js",
   "dependencies": {
     "@achingbrain/libp2p-gossipsub": "^0.12.2",
     "@chainsafe/libp2p-noise": "^5.0.2",
     "@solana/web3.js": "^1.29.1",
-    "@types/node": "^12.0.0",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
     "@types/react-router-dom": "^5.1.8",
@@ -22,11 +27,12 @@
     "typescript": "^4.1.2"
   },
   "scripts": {
-    "start": "HTTPS=true react-scripts start",
+    "start": "npx ts-node ./util/contract_api.ts",
     "build": "tsc",
     "test": "npx ts-node test/test.tsx",
     "prepare": "npm run build",
-    "postinstall": "tsc"
+    "postinstall": "tsc",
+    "package": "pkg . --output round-table-client"
   },
   "eslintConfig": {
     "extends": [
@@ -49,6 +55,9 @@
     ]
   },
   "devDependencies": {
-    "@babel/helper-compilation-targets": "^7.16.7"
+    "@babel/helper-compilation-targets": "^7.16.7",
+    "@types/bn.js": "^5.1.1",
+    "@types/node": "^18.7.8",
+    "pkg": "^5.8.0"
   }
 }

@@ -30,6 +30,30 @@ fn check_table_account<'a>(
     return Ok((table_acc, seed));
 }
 
+fn check_table_servers_account<'a>(
+    table_acc: &'a AccountInfo<'a>,
+    owner: &'a Pubkey,
+    program: &'a Pubkey,
+) -> Result<(&'a AccountInfo<'a>, Vec<Vec<u8>>), ProgramError> {
+    let (seed, pda) = accounts::derive_table_servers_seed(owner, program);
+    if &pda != table_acc.key {
+        return Err(ProgramError::Custom(Errors::BadTableAccount as u32));
+    }
+    return Ok((table_acc, seed));
+}
+
+fn check_table_channels_account<'a>(
+    table_acc: &'a AccountInfo<'a>,
+    owner: &'a Pubkey,
+    program: &'a Pubkey,
+) -> Result<(&'a AccountInfo<'a>, Vec<Vec<u8>>), ProgramError> {
+    let (seed, pda) = accounts::derive_table_channels_seed(owner, program);
+    if &pda != table_acc.key {
+        return Err(ProgramError::Custom(Errors::BadTableAccount as u32));
+    }
+    return Ok((table_acc, seed));
+}
+
 fn check_seat_account<'a>(
     seat_acc: &'a AccountInfo<'a>,
     table: &'a Pubkey,
@@ -90,10 +114,16 @@ fn str_buf_rm(array: &mut [u8], s_raw: &[u8]) -> Result<(), ProgramError> {
 
 /**
  * Account1 : Table
+ * Account2 : TableServers
+ * Account3 : TableChannels
  */
 fn init_table(context: Context, args: instruction::InitTableArgs) -> Result<(), ProgramError> {
     let (table_acc, table_seed) =
         check_table_account(&context.others[0], context.user.key, context.program.key)?;
+    let (table_servers_acc, table_servers_seed) =
+        check_table_servers_account(&context.others[0], context.user.key, context.program.key)?;
+    let (table_channels_acc, table_channels_seed) =
+        check_table_channels_account(&context.others[0], context.user.key, context.program.key)?;
 
     if table_acc.data.borrow().len() > 0 {
         return error(Errors::Error);
@@ -107,94 +137,138 @@ fn init_table(context: Context, args: instruction::InitTableArgs) -> Result<(), 
         false,
     );
     let new_data = accounts::TableData {
-        servers: [0; 512],
-        channels: [0; 512],
-        closed: args.closed,
+        table_id: context.user.key.clone(),
+        authority: args.authority,
+        closed: args.closed
     };
+
     // Write data to game account
     new_data
         .serialize(&mut &mut table_acc.data.borrow_mut()[..])
         .unwrap();
+
+    let _ = helpers::create_owned_funded_sized_pda(
+        &table_acc,
+        &context.program,
+        &context.user,
+        table_servers_seed,
+        args.servers_len,
+        false,
+    );
+    (&mut &mut table_servers_acc.data.borrow_mut()[..]).copy_from_slice(vec![0 as u8; args.servers_len as usize].as_slice());
+    
+    let _ = helpers::create_owned_funded_sized_pda(
+        &table_acc,
+        &context.program,
+        &context.user,
+        table_channels_seed,
+        args.channels_len,
+        false,
+    );
+    (&mut &mut table_channels_acc.data.borrow_mut()[..]).copy_from_slice(vec![0 as u8; args.channels_len as usize].as_slice());
+    
     msg!("Created table!");
     Ok(())
 }
 
 /**
  * Account1 : Table
+ * Account2 : TableServers
+ * Account3 : TableChannels
  */
 fn delete_table(context: Context) -> Result<(), ProgramError> {
     let (table_acc, _) =
         check_table_account(&context.others[0], context.user.key, context.program.key)?;
+    let (table_servers_acc, _) =
+        check_table_servers_account(&context.others[0], context.user.key, context.program.key)?;
+    let (table_channels_acc, _) =
+        check_table_channels_account(&context.others[0], context.user.key, context.program.key)?;
     if table_acc.data.borrow().len() == 0 {
         return error(Errors::Error);
     }
     helpers::delete_pda(table_acc, context.user).unwrap();
+    helpers::delete_pda(table_servers_acc, context.user).unwrap();
+    helpers::delete_pda(table_channels_acc, context.user).unwrap();
 
     Ok(())
 }
 
 /**
  * Account1 : Table
+ * Account2 : TableServers
  */
 fn add_bootstrap(context: Context, args: instruction::AddBootstrapArgs) -> Result<(), ProgramError> {
-    let (table_acc, _) =
+    let (_table_acc, _) =
         check_table_account(&context.others[0], context.user.key, context.program.key)?;
+    let (table_servers_acc, _) =
+        check_table_servers_account(&context.others[0], context.user.key, context.program.key)?;
 
-    str_buf_add(&mut table_acc.data.borrow_mut()[0..512], &args.bootstrap)?;
+    str_buf_add(&mut table_servers_acc.data.borrow_mut(), &args.bootstrap)?;
 
     Ok(())
 }
 
 /**
  * Account1 : Table
+ * Account2 : TableServers
  */
 fn remove_bootstrap(context: Context, args: instruction::RemoveBootstrapArgs) -> Result<(), ProgramError> {
-    let (table_acc, _) =
+    let (_table_acc, _) =
         check_table_account(&context.others[0], context.user.key, context.program.key)?;
+    let (table_servers_acc, _) =
+        check_table_servers_account(&context.others[0], context.user.key, context.program.key)?;
 
-    str_buf_rm(&mut table_acc.data.borrow_mut()[0..512], &args.bootstrap)?;
+    str_buf_rm(&mut table_servers_acc.data.borrow_mut(), &args.bootstrap)?;
 
     Ok(())
 }
 
 /**
  * Account1 : Table
+ * Account2 : TableChannels
  */
 fn add_channel(context: Context, args: instruction::AddChannelArgs) -> Result<(), ProgramError> {
-    let (table_acc, _) =
+    let (_table_acc, _) =
         check_table_account(&context.others[0], context.user.key, context.program.key)?;
+    let (table_channels_acc, _) =
+        check_table_channels_account(&context.others[0], context.user.key, context.program.key)?;
 
-    str_buf_add(&mut table_acc.data.borrow_mut()[512..1024], &args.channel)?;
+    str_buf_add(&mut table_channels_acc.data.borrow_mut(), &args.channel)?;
 
     Ok(())
 }
 
 /**
  * Account1 : Table
+ * Account2 : TableChannels
  */
 fn remove_channel(
     context: Context,
     args: instruction::RemoveChannelArgs,
 ) -> Result<(), ProgramError> {
-    let (table_acc, _) =
+    let (_table_acc, _) =
         check_table_account(&context.others[0], context.user.key, context.program.key)?;
+    let (table_channels_acc, _) =
+        check_table_channels_account(&context.others[0], context.user.key, context.program.key)?;
 
-    str_buf_rm(&mut table_acc.data.borrow_mut()[512..1024], &args.channel)?;
+    str_buf_rm(&mut table_channels_acc.data.borrow_mut(), &args.channel)?;
 
     Ok(())
 }
 
 /**
- * Account1 : TableOwner
- * Account2 : Table
- * Account3 : Seat
+ * Account1 : TableAuthority
+ * Account2 : TableOwner
+ * Account3 : Table
+ * Account4 : Seat
  */
 fn add_seat(context: Context, args: instruction::AddSeatArgs) -> Result<(), ProgramError> {
-    let table_owner_acc = &context.others[0];
+    let table_authority_acc = &context.others[0];
+    let table_owner_acc = &context.others[1];
     let (table_acc, _) =
-        check_table_account(&context.others[1], table_owner_acc.key, context.program.key)?;
+        check_table_account(&context.others[2], table_owner_acc.key, context.program.key)?;
     let (seat_acc, seat_seed) = check_seat_account(
-        &context.others[2],
+        &context.others[3],
         table_acc.key,
         context.user.key,
         context.program.key,
@@ -206,8 +280,8 @@ fn add_seat(context: Context, args: instruction::AddSeatArgs) -> Result<(), Prog
             return error(Errors::Error);
         }
     };
-    if table_data.closed && !table_owner_acc.is_signer {
-        return error(Errors::Error);
+    if table_data.closed && (!table_authority_acc.is_signer && (table_data.authority.to_bytes() == table_authority_acc.key.to_bytes())){
+        return error(Errors::NotAllowed);
     }
 
     let _ = helpers::create_owned_funded_sized_pda(
@@ -220,7 +294,9 @@ fn add_seat(context: Context, args: instruction::AddSeatArgs) -> Result<(), Prog
     );
 
     let new_seat = accounts::SeatData {
-        channel_pubkey: args.channel_key,
+        table_id: table_owner_acc.key.clone(),
+        owner: context.user.key.clone(),
+        channel_pubkey: args.channel_key.clone(),
     };
 
     // Write data to game account
