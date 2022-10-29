@@ -291,7 +291,7 @@ export class MatchAgent {
     state: MatchAgentsStates = MatchAgentsStates.IDLE;
     counter: number;
     lastActionStart: number = 0;
-    targetMatch: string | null = null;
+    targetMatch: string[] | null = null;
     matchId: string | null = null;
     manager: MatchManager;
     matchCallback: ((result: MatchResult) => void) | null = null;
@@ -317,7 +317,7 @@ export class MatchAgent {
         this.startMatch(this.targetMatch, this.counter, this.matchCallback);
     }
 
-    startMatch(targetMatch: string, counter: number, matchCallback: (result: MatchResult) => void): boolean {
+    startMatch(targetMatch: string[], counter: number, matchCallback: (result: MatchResult) => void): boolean {
         console.log("Matcher: Starting match: " + targetMatch)
         if (this.state != MatchAgentsStates.IDLE) {
             // Cannot start matching, already matching
@@ -336,7 +336,7 @@ export class MatchAgent {
 
         for (var m in randomItems) {
             var match = randomItems[m][1];
-            if (match.match == this.targetMatch && (!match.advertiser.equals(this.id)) && (match.acksSeen.length == 0)) {
+            if ( (this.targetMatch.indexOf(match.match) > -1) && (!match.advertiser.equals(this.id)) && (match.acksSeen.length == 0)) {
                 console.log("Matcher: Joining existing game with id: " + match.matchId)
                 this.state = MatchAgentsStates.JOINING_WAITING_ACK;
                 this.lastActionStart = (new Date()).getTime();
@@ -353,13 +353,13 @@ export class MatchAgent {
 
         console.log("Matcher: Advertising game")
         // Or start to advertise our own match
-        this.matchId = getMatchID(this.id, targetMatch);
+        this.matchId = getMatchID(this.id, this.targetMatch[0]);
         console.log("Matcher: Setting matchId " + this.matchId)
         this.state = MatchAgentsStates.SERVING_WAITING_CLAIMS;
         this.lastActionStart = (new Date()).getTime();
         this.manager.sendAdvertiseMessage(new MatchAdvertiseMessage(
             this.id,
-            this.targetMatch,
+            this.targetMatch[0],
             this.counter
         ))
 

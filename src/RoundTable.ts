@@ -22,7 +22,7 @@ export interface IRoundPresence {
 export interface IRoundMatch {
     getMatches(): MatchState[];
     addMatchListener(listener: MatchEventListener): void;
-    findMatch(match: string, counter: number, callback: (match: MatchResult) => void): void;
+    findMatch(match: string[], counter: number, callback: (match: MatchResult) => void): void;
     stopMatch(): void;
 }
 
@@ -98,7 +98,7 @@ export class RoundTable implements IRoundChat, IRoundPresence, IRoundMatch, IRou
         this.matchManager.addMatchStateListener(listener)
     }
 
-    findMatch(match: string, counter: number, callback: (match: MatchResult) => void): boolean {
+    findMatch(match: string[], counter: number, callback: (match: MatchResult) => void): boolean {
         return this.matchManager.matchAgent.startMatch(match, counter, callback);
     }
 
